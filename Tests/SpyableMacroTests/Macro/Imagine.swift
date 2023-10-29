@@ -15,13 +15,17 @@ public protocol SCCrashLoggerNetworkExecuting: NSObjectProtocol {
     ) -> String
 }
 
+//@GenerateMock
+//public class SCCrashLoggerNetworkExecutorMock: NSObject {
+//
+//}
+
 public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExecuting {
     public class Invocations_PerformRequest {
         var invocations: [Invocation_performRequest] = []
     }
 
     // Generated if all non-block params are Equatable.
-    @discardableResult
     public func stub_performRequest(
         request: URLRequest,
         reportId: String,
@@ -29,8 +33,8 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
         onSuccess: InvokeBlock?,
         onPermanentFailure: InvokeBlock2<Error, String>?,
         andReturn value: String
-    ) -> Invocations_PerformRequest {
-        return stub_performRequest(
+    ) {
+        stub_performRequest(
             request: .eq(request),
             reportId: .eq(reportId),
             includeLogs: .eq(includeLogs),
@@ -41,7 +45,6 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
     }
 
     // Always generated.
-    @discardableResult
     public func stub_performRequest(
         request: Matching<URLRequest>,
         reportId: Matching<String>,
@@ -49,8 +52,28 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
         onSuccess: InvokeBlock?,
         onPermanentFailure: InvokeBlock2<Error, String>?,
         andReturn value: String
-    ) -> Invocations_PerformRequest {
-        stubbed_performRequest = Stub_performRequest(
+    ) {
+        expect_performRequest(
+            request: request,
+            reportId: reportId,
+            includeLogs: includeLogs, 
+            onSuccess: onSuccess,
+            onPermanentFailure: onPermanentFailure,
+            andReturn: value,
+            expectation: nil
+        )
+    }
+
+    public func expect_performRequest(
+        request: Matching<URLRequest>,
+        reportId: Matching<String>,
+        includeLogs: Matching<Bool>,
+        onSuccess: InvokeBlock?,
+        onPermanentFailure: InvokeBlock2<Error, String>?,
+        andReturn value: String,
+        expectation: Expectation?
+    ) {
+        let stub = Stub_performRequest(
             request: request,
             reportId: reportId,
             includeLogs: includeLogs,
@@ -58,8 +81,54 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
             onPermanentFailure: onPermanentFailure,
             returnValue: value
         )
+        expectations_performRequest.append((stub, expectation))
+    }
 
-        return invocations_performRequest
+    public func verify_performRequest() {
+        var invocations = invocations_performRequest
+        for (stub, expectation) in expectations_performRequest.reversed() {
+            guard let expectation = expectation else {
+                continue
+            }
+            var matchedCalls = 0
+            var index = 0
+            while index < invocations.count {
+                if stub.matches(invocations[index]) {
+                    invocations.remove(at: index)
+                    matchedCalls += 1
+                } else {
+                    index += 1
+                }
+            }
+
+            expectation.callCountPredicate.verify(
+                methodSignature:"""
+                performRequest(
+                    request: \(stub.request.description),
+                    reportId: \(stub.reportId.description),
+                    includeLogs: \(stub.includeLogs.description),
+                    onSuccess: @escaping () -> Void,
+                    onPermanentFailure: @escaping (Error, String) -> Void
+                )
+                """,
+                callCount: matchedCalls
+            )
+        }
+
+        for invocation in invocations {
+            XCTFail(
+            """
+            These invocations are made but not expected:
+            performRequest(
+                request: \(invocation.request),
+                reportId: \(invocation.reportId),
+                includeLogs: \(invocation.includeLogs),
+                onSuccess: (...),
+                onPermanentFailure: (...)
+            )
+            """
+            )
+        }
     }
 
     public struct Stub_performRequest {
@@ -69,6 +138,12 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
         let onSuccess: InvokeBlock?
         let onPermanentFailure: InvokeBlock2<Error, String>?
         let returnValue: String
+
+        func matches(_ invocation: Invocation_performRequest) -> Bool {
+            return request.predicate(invocation.request) &&
+            reportId.predicate(invocation.reportId) &&
+            includeLogs.predicate(invocation.includeLogs)
+        }
     }
 
     public struct Invocation_performRequest {
@@ -79,8 +154,9 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
         let onPermanentFailure: Void
     }
 
-    private(set) var stubbed_performRequest: Stub_performRequest?
-    private(set) var invocations_performRequest: Invocations_PerformRequest = Invocations_PerformRequest()
+    // Stores the return value mapped from each stub.
+    private(set) var expectations_performRequest: [(Stub_performRequest, Expectation?)] = []
+    private(set) var invocations_performRequest = [Invocation_performRequest]()
 
     @objc
     public func performRequest(
@@ -90,14 +166,7 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
         onSuccess: @escaping () -> Void,
         onPermanentFailure: @escaping (Error, String) -> Void
     ) -> String {
-        guard let stub = stubbed_performRequest else {
-            fatalError("Unexpected invocation of unstubbed method")
-        }
-
-        if stub.request.predicate(request) &&
-            stub.reportId.predicate(reportId) &&
-            stub.includeLogs.predicate(includeLogs) {
-            
+        for (stub, _) in expectations_performRequest.reversed() {
             let invocation = Invocation_performRequest(
                 request: request,
                 reportId: reportId,
@@ -105,17 +174,26 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
                 onSuccess: (),
                 onPermanentFailure: ()
             )
-            invocations_performRequest.invocations.append(invocation)
 
-            if let _ = stub.onSuccess {
-                onSuccess()
-            }
+            invocations_performRequest.append(invocation)
 
-            if let invoke_onPermanentFailure = stub.onPermanentFailure {
-                onPermanentFailure(invoke_onPermanentFailure.param1, invoke_onPermanentFailure.param2)
+            if stub.request.predicate(request) &&
+                stub.reportId.predicate(reportId) &&
+                stub.includeLogs.predicate(includeLogs) {
+
+                if let _ = stub.onSuccess {
+                    onSuccess()
+                }
+
+                if let invoke_onPermanentFailure = stub.onPermanentFailure {
+                    onPermanentFailure(invoke_onPermanentFailure.param1, invoke_onPermanentFailure.param2)
+                }
+
+                return stub.returnValue
             }
         }
-        return stub.returnValue
+
+        fatalError("Unexpected invocation of performRequest(request: \(request), reportId: \(reportId), includeLogs: \(includeLogs), onSuccess:, onPermanentFailure:. Could not continue without a return value. Did you stub it?")
     }
 }
 

@@ -2,7 +2,7 @@
 
 import XCTest
 
-class TestContainer {
+class TestedClass {
     let executor: SCCrashLoggerNetworkExecuting
 
     init(executor: SCCrashLoggerNetworkExecuting) {
@@ -41,13 +41,16 @@ final class ImagineDemo: XCTestCase {
 
     func test_success() throws {
         let mock = SCCrashLoggerNetworkExecutorMock()
-        let container = TestContainer(executor: mock)
+        let container = TestedClass(executor: mock)
         let expectation = expectation(description: "")
 
         mock.stub_performRequest(
-            request: .satisfies {
-                $0.url == URL(string: "https://test.com/123")!
-            },
+            request: Matching(
+                {
+                    $0.url == URL(string: "https://test.com/123")!
+                },
+                description: "==\"https://test.com/123\""
+            ),
             reportId: .eq("123"),
             includeLogs: .eq(true),
             onSuccess: InvokeBlock(),
@@ -65,18 +68,22 @@ final class ImagineDemo: XCTestCase {
             ),
             "identifier"
         )
-        XCTAssertEqual(mock.invocations_performRequest.invocations.count, 1)
+        mock.verify_performRequest()
+        waitForExpectations(timeout: 1)
     }
 
-    func test_failure() throws {
-        let mock = SCCrashLoggerNetworkExecutorMock()
-        let container = TestContainer(executor: mock)
+    func test_failure_unstubbedInvocation() throws {
+        let mock = SCCrashLoggerNetworkExecutorMock() // generated
+        let container = TestedClass(executor: mock)
         let expectation2 = expectation(description: "")
 
         mock.stub_performRequest(
-            request: .satisfies {
-                $0.url == URL(string: "https://test.com/345")!
-            },
+            request: Matching(
+                {
+                    $0.url == URL(string: "https://test.com/123")!
+                },
+                description: "==\"https://test.com/123\""
+            ),
             reportId: .eq("123"),
             includeLogs: .eq(true),
             onSuccess: InvokeBlock(),
@@ -94,6 +101,36 @@ final class ImagineDemo: XCTestCase {
             ), 
             "identifier"
         )
-        XCTAssertEqual(mock.invocations_performRequest.invocations.count, 1)
+        mock.verify_performRequest()
+        waitForExpectations(timeout: 1)
+    }
+
+    func test_failure_expectedInvocationCount_shouldFail() throws {
+        let mock = SCCrashLoggerNetworkExecutorMock() // generated
+        let container = TestedClass(executor: mock)
+        let expectation2 = expectation(description: "")
+
+        mock.expect_performRequest(
+            request: .url(URL(string: "https://test.com/123")!),
+            reportId: .eq("123"),
+            includeLogs: .eq(true),
+            onSuccess: nil,
+            onPermanentFailure: InvokeBlock2(NSError(domain: "aaa", code: 1), "sss"),
+            andReturn: "identifier",
+            expectation: .count(0)
+        )
+
+        XCTAssertEqual(
+            container.run(
+                reportId: "123",
+                onCompletion: { error in
+                    XCTAssertNotNil(error)
+                    expectation2.fulfill()
+                }
+            ),
+            "identifier"
+        )
+        mock.verify_performRequest()
+        waitForExpectations(timeout: 1)
     }
 }
