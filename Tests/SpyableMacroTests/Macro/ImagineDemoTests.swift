@@ -130,6 +130,7 @@ final class ImagineDemo: XCTestCase {
             ),
             "identifier"
         )
+
         mock.verify_performRequest()
         waitForExpectations(timeout: 1)
     }

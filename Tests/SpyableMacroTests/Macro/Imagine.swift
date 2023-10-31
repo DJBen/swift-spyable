@@ -87,9 +87,6 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
     public func verify_performRequest() {
         var invocations = invocations_performRequest
         for (stub, expectation) in expectations_performRequest.reversed() {
-            guard let expectation = expectation else {
-                continue
-            }
             var matchedCalls = 0
             var index = 0
             while index < invocations.count {
@@ -101,7 +98,7 @@ public class SCCrashLoggerNetworkExecutorMock: NSObject, SCCrashLoggerNetworkExe
                 }
             }
 
-            expectation.callCountPredicate.verify(
+            expectation?.callCountPredicate.verify(
                 methodSignature:"""
                 performRequest(
                     request: \(stub.request.description),
