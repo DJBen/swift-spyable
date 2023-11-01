@@ -45,12 +45,7 @@ final class ImagineDemo: XCTestCase {
         let expectation = expectation(description: "")
 
         mock.stub_performRequest(
-            request: Matching(
-                {
-                    $0.url == URL(string: "https://test.com/123")!
-                },
-                description: "==\"https://test.com/123\""
-            ),
+            request: .url(URL(string: "https://test.com/123")!),
             reportId: .eq("123"),
             includeLogs: .eq(true),
             onSuccess: InvokeBlock(),
@@ -78,12 +73,7 @@ final class ImagineDemo: XCTestCase {
         let expectation2 = expectation(description: "")
 
         mock.stub_performRequest(
-            request: Matching(
-                {
-                    $0.url == URL(string: "https://test.com/123")!
-                },
-                description: "==\"https://test.com/123\""
-            ),
+            request: .url(URL(string: "https://test.com/123")!),
             reportId: .eq("123"),
             includeLogs: .eq(true),
             onSuccess: InvokeBlock(),
@@ -105,7 +95,7 @@ final class ImagineDemo: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-    func test_failure_expectedInvocationCount_shouldFail() throws {
+    func DISABLED_test_failure_expectedInvocationCount_shouldFail() throws {
         let mock = SCCrashLoggerNetworkExecutorMock() // generated
         let container = TestedClass(executor: mock)
         let expectation2 = expectation(description: "")

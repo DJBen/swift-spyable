@@ -3,39 +3,10 @@ import XCTest
 import SwiftSyntax
 
 final class FunctionMockImplFactoryTests: XCTestCase {
-    private let protocolDecl = try! ProtocolDeclSyntax(
-        #"""
-        @objc
-        public protocol SCCrashLoggerNetworkExecuting: NSObjectProtocol {
-            @objc
-            func performRequest(
-                request: URLRequest,
-                reportId: String,
-                includeLogs: Bool,
-                onSuccess: @escaping () -> Void,
-                onPermanentFailure: @escaping (Error, String) -> Void
-            ) -> String
-        }
-        """#
-    )
-
     func testDeclaration() throws {
-        let protocolFunctionDeclaration = try FunctionDeclSyntax(
-            #"""
-            @objc
-            func performRequest(
-                request: URLRequest,
-                reportId: String,
-                includeLogs: Bool,
-                onSuccess: @escaping () -> Void,
-                onPermanentFailure: @escaping (Error, String) -> Void
-            ) -> String
-            """#
-        )
-
         let result = try FunctionMockImplFactory().declaration(
-            protocolDecl: protocolDecl,
-            protocolFunctionDeclaration: protocolFunctionDeclaration
+            protocolDecl: TestCases.Case1.protocolDecl,
+            protocolFunctionDeclaration: TestCases.Case1.functionDecl
         )
 
         assertBuildResult(

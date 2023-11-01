@@ -3,8 +3,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-/// FunctionImplFactory designs to generate function implementations for the generated mocked class.
-/// The
+/// FunctionMockImplFactory designs to generate function implementations for the generated mocked class.
 struct FunctionMockImplFactory {
     func declaration(
         protocolDecl: ProtocolDeclSyntax,
@@ -17,8 +16,8 @@ struct FunctionMockImplFactory {
             modifiers.append(scopeModifier.trimmed)
         }
         return try FunctionDeclSyntax(
-            attributes: protocolFunctionDeclaration.attributes,
-            modifiers: modifiers,
+            attributes: protocolFunctionDeclaration.attributes.trimmed,
+            modifiers: modifiers.trimmed,
             funcKeyword: protocolFunctionDeclaration.funcKeyword.trimmed,
             name: protocolFunctionDeclaration.name,
             genericParameterClause: protocolFunctionDeclaration.genericParameterClause,
